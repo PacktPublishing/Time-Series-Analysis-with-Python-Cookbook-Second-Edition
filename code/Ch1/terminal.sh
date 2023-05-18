@@ -1,0 +1,108 @@
+# using Conda 
+# updating the conda environment
+conda update conda
+conda update anaconda
+conda update --all
+
+# create a new conda environment
+conda create -n py310 python=3.10
+conda create -n py310 python=3.10 -y
+
+# activate the conda environment
+conda activate py310
+
+# check the conda environments
+conda info --envs
+
+# install a package
+conda install pandas=2.0.1
+
+# adding a conda channel
+conda config --add channels conda-forge
+
+# adding a specific channel for MacOS ARM64
+conda config --add channels conda-forge/osx-arm64
+
+# Using Venv
+python -m venv py310
+
+# activate the venv
+source py310/bin/activate
+
+# deactivate the venv
+deactivate
+
+# -------------------------------------------------
+# create a conda environment from a yml file
+conda env create -f env.yml
+conda activate tscookbook
+
+# exporeting the py310 environment to a yml file
+conda env export -n py310 -f env.yml
+conda env export -n py310 > env.yml
+conda env export -name py310 -file env.yml
+
+# clone an environment
+conda create --name py310_clone --clone py310 
+
+# creating a new environment and installing all packages from a requirements.txt file in one statement using conda create
+conda create --name ch1 --file requirements.txt
+conda create -n ch1 --file requirements.txt
+conda env create -n ch1 --f requirements.txt
+conda env create --name ch1 --file requirements.txt
+
+# creating an environment from a requirements.txt file using pip and venv
+python -m venv ~/Desktop/timeseries
+source ~/Desktop/timeseries/bin/activate
+pip install -r requirements.txt
+
+
+# Boostraping a requirements.txt file
+# using Pip
+pip freeze > requirements.txt
+
+# using conda
+conda list --export > requirements.txt
+conda list -e > requirements.txt
+
+# using conda only for explicit packages
+conda env export --from-history > requirements.yml
+conda env export -n ch1 --from-history > env.yml
+
+
+# -------------------------------------------------
+# Installing jupyterlab
+
+# using conda
+conda install -c conda-forge jupyterlab -y
+
+# launch jupyterlab
+jupyter lab
+jupyter-lab
+
+# using pip
+pip install jupyterlab
+
+# Genereate a jupyterlab config file to register a browser
+jupyter-lab --generate-config
+
+# example of a jupyterlab config file to add chrome as a browser on Windows OS
+import webbrowser
+webbrowser.register('chrome', None, webbrowser.GenericBrowser('C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'))
+# adding edge as a browser on Windows OS
+webbrowser.register('edge', None, webbrowser.GenericBrowser('C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'))
+
+# launching jupyterlab with a specific browser
+jupyter-lab --browser chrome
+
+# launching jupyterlab without a browser
+jupyter-lab --no-browser
+
+# installing a jupyter kernel for timeseries environment in conda
+python -m ipykernel install --user --name timeseries --display-name "Time Series"
+
+# list of available kernels
+jupyter kernelspec list
+
+# installing an extenstion in jupyterlab
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
