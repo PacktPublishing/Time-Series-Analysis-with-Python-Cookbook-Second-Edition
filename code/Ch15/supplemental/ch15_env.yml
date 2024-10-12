@@ -1,9 +1,0 @@
-name: ch15
-channels:
-  - defaults
-dependencies:
-  - ipykernel
-  - python=3.9
-  - pandas
-  - matplotlib
-  - prophet
