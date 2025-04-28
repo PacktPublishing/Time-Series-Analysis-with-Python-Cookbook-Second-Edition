@@ -1,6 +1,6 @@
 # using Conda 
 # updating the conda environment
-conda update conda
+conda update conda -y
 conda update anaconda
 conda update --all
 
@@ -15,7 +15,7 @@ conda activate py310
 conda info --envs
 
 # install a package
-conda install pandas=2.0.1
+conda install pandas=2.2.3
 
 # adding a conda channel
 conda config --add channels conda-forge
@@ -40,7 +40,7 @@ conda activate tscookbook
 # exporeting the py310 environment to a yml file
 conda env export -n py310 -f env.yml
 conda env export -n py310 > env.yml
-conda env export -name py310 -file env.yml
+conda env export --name py310 --file env.yml
 
 # clone an environment
 conda create --name py310_clone --clone py310 
@@ -93,16 +93,16 @@ webbrowser.register('chrome', None, webbrowser.GenericBrowser('C:\Program Files 
 webbrowser.register('edge', None, webbrowser.GenericBrowser('C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'))
 
 # launching jupyterlab with a specific browser
-jupyter-lab --browser chrome
+jupyter lab --browser=chrome
 
 # launching jupyterlab without a browser
-jupyter-lab --no-browser
+jupyter lab --no-browser
+
+# Specifying browser and port
+jupyter lab --browser=chrome --port 8890
 
 # installing a jupyter kernel for timeseries environment in conda
 python -m ipykernel install --user --name timeseries --display-name "Time Series"
 
 # list of available kernels
 jupyter kernelspec list
-
-# installing an extenstion in jupyterlab
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
