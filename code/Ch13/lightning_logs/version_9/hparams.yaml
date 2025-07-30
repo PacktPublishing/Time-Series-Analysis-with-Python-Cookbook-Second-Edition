@@ -1,0 +1,77 @@
+alias: null
+batch_size: 32
+context_size: null
+dataloader_kwargs: null
+decoder_hidden_size: 128
+decoder_layers: 2
+drop_last_loader: false
+early_stop_patience_steps: 15
+encoder_bias: true
+encoder_dropout: 0.3
+encoder_hidden_size: 32
+encoder_n_layers: 2
+exclude_insample_y: false
+futr_exog_list: null
+h: 30
+h_train: 1
+hist_exog_list:
+- "T [\xB0C]"
+- StrGlo [W/m2]
+- RainDur [min]
+- Hr [%Hr]
+inference_input_size: null
+inference_windows_batch_size: 1024
+input_size: 120
+learning_rate: 0.001
+loss: &id001 !!python/object:neuralforecast.losses.pytorch.MAE
+  _backward_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _backward_pre_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _buffers: {}
+  _forward_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _forward_hooks_always_called: !!python/object/apply:collections.OrderedDict
+  - []
+  _forward_hooks_with_kwargs: !!python/object/apply:collections.OrderedDict
+  - []
+  _forward_pre_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _forward_pre_hooks_with_kwargs: !!python/object/apply:collections.OrderedDict
+  - []
+  _is_full_backward_hook: null
+  _load_state_dict_post_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _load_state_dict_pre_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _modules: {}
+  _non_persistent_buffers_set: !!set {}
+  _parameters: {}
+  _state_dict_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  _state_dict_pre_hooks: !!python/object/apply:collections.OrderedDict
+  - []
+  horizon_weight: null
+  is_distribution_output: false
+  output_names:
+  - ''
+  outputsize_multiplier: 1
+  training: true
+lr_scheduler: null
+lr_scheduler_kwargs: null
+max_steps: 43500
+n_samples: 100
+n_series: 1
+num_lr_decays: 5
+optimizer: null
+optimizer_kwargs: null
+random_seed: 42
+recurrent: false
+scaler_type: standard
+start_padding_enabled: false
+stat_exog_list: null
+step_size: 1
+val_check_steps: 87
+valid_batch_size: null
+valid_loss: *id001
+windows_batch_size: 128
