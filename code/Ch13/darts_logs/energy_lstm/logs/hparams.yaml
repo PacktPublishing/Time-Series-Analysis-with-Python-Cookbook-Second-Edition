@@ -10,7 +10,6 @@ lr_scheduler_kwargs:
   mode: min
   monitor: val_loss
   patience: 5
-  verbose: true
 name: LSTM
 nr_params: 1
 num_layers: 2

@@ -28,8 +28,8 @@ callbacks:
       gAKKCmz8nEb5IGqoUBkugAJN6QMugAJ9cQAoWBAAAABwcm90b2NvbF92ZXJzaW9ucQFN6QNYDQAA
       AGxpdHRsZV9lbmRpYW5xAohYCgAAAHR5cGVfc2l6ZXNxA31xBChYBQAAAHNob3J0cQVLAlgDAAAA
       aW50cQZLBFgEAAAAbG9uZ3EHSwR1dS6AAihYBwAAAHN0b3JhZ2VxAGN0b3JjaApGbG9hdFN0b3Jh
-      Z2UKcQFYDwAAADEwNTU1MzIxMzA1ODAxNnECWAMAAABjcHVxA0sBTnRxBFEugAJdcQBYDwAAADEw
-      NTU1MzIxMzA1ODAxNnEBYS4BAAAAAAAAAAAAgH8=
+      Z2UKcQFYCwAAADE2MTMzNDUwNjA4cQJYAwAAAGNwdXEDSwFOdHEEUS6AAl1xAFgLAAAAMTYxMzM0
+      NTA2MDhxAWEuAQAAAAAAAAAAAIB/
   - 0
   - !!python/tuple []
   - !!python/tuple []
@@ -131,6 +131,7 @@ scaler_type: standard
 start_padding_enabled: false
 stat_exog_list: null
 step_size: 1
+training_data_availability_threshold: 0.0
 val_check_steps: 87
 valid_batch_size: null
 valid_loss: null

@@ -83,6 +83,7 @@ scaler_type: standard
 start_padding_enabled: false
 stat_exog_list: null
 step_size: 1
+training_data_availability_threshold: 0.0
 val_check_steps: 18
 valid_batch_size: null
 valid_loss: null
