@@ -42,7 +42,7 @@ dependencies = [
     "parso==0.8.5",
     "peewee==3.18.2",
     "pexpect==4.9.0",
-    "pip==25.2",
+    "pip==25.3",
     "pipdeptree==2.28.0",
     "platformdirs==4.4.0",
     "prompt-toolkit==3.0.52",
