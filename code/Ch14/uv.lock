@@ -158,6 +158,7 @@ dependencies = [
     { name = "six" },
     { name = "stack-data" },
     { name = "statsmodels" },
+    { name = "suod" },
     { name = "sympy" },
     { name = "threadpoolctl" },
     { name = "torch" },
@@ -218,7 +219,7 @@ requires-dist = [
     { name = "ptyprocess", specifier = "==0.7.0" },
     { name = "pure-eval", specifier = "==0.2.3" },
     { name = "pygments", specifier = "==2.19.2" },
-    { name = "pyod", specifier = "==2.0.5" },
+    { name = "pyod", specifier = ">=2.0.6" },
     { name = "pyparsing", specifier = "==3.2.5" },
     { name = "python-dateutil", specifier = "==2.9.0.post0" },
     { name = "pytz", specifier = "==2025.2" },
@@ -229,6 +230,7 @@ requires-dist = [
     { name = "six", specifier = "==1.17.0" },
     { name = "stack-data", specifier = "==0.6.3" },
     { name = "statsmodels", specifier = "==0.14.5" },
+    { name = "suod", specifier = ">=0.1.4" },
     { name = "sympy", specifier = "==1.14.0" },
     { name = "threadpoolctl", specifier = "==3.6.0" },
     { name = "torch", specifier = "==2.8.0" },
@@ -249,6 +251,21 @@ sdist = { url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6", size = 25335, upload-time = "2022-10-25T02:36:20.889Z" },
 ]
+
+[[package]]
+name = "combo"
+version = "0.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "joblib" },
+    { name = "matplotlib" },
+    { name = "numba" },
+    { name = "numpy" },
+    { name = "pyod" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ff/76/1c86426e35a8b1cd5f404db654d2a602bac27263063163ead1230066c1e6/combo-0.1.3.tar.gz", hash = "sha256:6536d6d2f0a7a3a136c2127ba82c4bd640fc245c282c2d0060ad49070e57f42a", size = 38527, upload-time = "2022-04-02T16:20:07.788Z" }
 
 [[package]]
 name = "comm"
@@ -1260,7 +1277,7 @@ wheels = [
 
 [[package]]
 name = "pyod"
-version = "2.0.5"
+version = "2.0.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "joblib" },
@@ -1270,9 +1287,9 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/08/285c2fa790a095a212c9300ed77b69bf1e90233853cb260ac0edcbb1b029/pyod-2.0.5.tar.gz", hash = "sha256:c1c2d2f3e8ebfb047c9b5da556cce924e64f7eeb1ad9d5af1455843ec13cb3d1", size = 169761, upload-time = "2025-04-29T22:26:59.531Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/09/89/403bcf8cc00e44295d0f9bb31eed2ace8ca8247b71ff5a946408c57b15ed/pyod-2.0.6.tar.gz", hash = "sha256:4fb51575ca9bec123f140cad9bb5d0e0f0872734ea11b8afcee14209c0331f5c", size = 173730, upload-time = "2025-12-02T18:29:52.103Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/29/38/dee2fc597010654c3a7588f0990192680c5f2d405fbf6f2e5f5c4df1c736/pyod-2.0.5-py3-none-any.whl", hash = "sha256:1a3182529c68e388be0671840bb11f83d5d1deb738ad931d294881f7d50e4fdb", size = 200628, upload-time = "2025-04-29T22:26:57.284Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/fe/849ed734cffe60fa22ae4d7327166323af3290302f7586fa860097f92e66/pyod-2.0.6-py3-none-any.whl", hash = "sha256:6120c7f40c0e595041a3316eedb646bf154b49984cb8353c0f6a347dc4fbdbc4", size = 204654, upload-time = "2025-12-02T18:29:50.977Z" },
 ]
 
 [[package]]
@@ -1500,6 +1517,23 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/28/bb/59e7be0271be264b7b541baf3973f97747740950bfd5115de731f63da8ab/statsmodels-0.14.5-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:557df3a870a57248df744fdfcc444ecbc5bdbf1c042b8a8b5d8e3e797830dc2a", size = 10694060, upload-time = "2025-10-30T16:33:07.656Z" },
     { url = "https://files.pythonhosted.org/packages/8b/c0/b28d0fd0347ea38d3610052f479e4b922eb33bb8790817f93cd89e6e08ba/statsmodels-0.14.5-cp314-cp314-win_amd64.whl", hash = "sha256:95af7a9c4689d514f4341478b891f867766f3da297f514b8c4adf08f4fa61d03", size = 9648961, upload-time = "2025-10-30T13:47:24.303Z" },
 ]
+
+[[package]]
+name = "suod"
+version = "0.1.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "combo" },
+    { name = "joblib" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "psutil" },
+    { name = "pyod" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/83/35/e8fe2a2d265d4cbbe6529b183d392e103a9b48574af3423f4a4b885efe13/suod-0.1.4.tar.gz", hash = "sha256:6ed58b7b1b1a97930d10a5a402705b851829eba112240444fcff89b36863cb56", size = 172136, upload-time = "2025-03-24T21:18:50.402Z" }
 
 [[package]]
 name = "sympy"
