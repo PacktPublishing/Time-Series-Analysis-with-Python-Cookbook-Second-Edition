@@ -28,7 +28,7 @@ dependencies = [
     "defusedxml==0.7.1",
     "executing==2.2.1",
     "fastjsonschema==2.21.2",
-    "fonttools==4.60.1",
+    "fonttools==4.61.0",
     "fqdn==1.5.1",
     "h11==0.16.0",
     "holoviews==1.21.0",
