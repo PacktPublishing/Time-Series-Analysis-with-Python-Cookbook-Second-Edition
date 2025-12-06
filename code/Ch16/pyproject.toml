@@ -122,7 +122,7 @@ dependencies = [
     "triad==0.9.8",
     "typing-extensions==4.15.0",
     "tzdata==2025.2",
-    "urllib3==2.5.0",
+    "urllib3==2.6.0",
     "utilsforecast==0.2.14",
     "wcwidth==0.2.14",
     "werkzeug==3.1.3",
