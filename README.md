@@ -1,10 +1,5 @@
 # Time Series Analysis with Python Cookbook, Second Edition
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Packt](https://img.shields.io/badge/Packt-Published-orange.svg)](https://www.packtpub.com/)
-
-Time Series Analysis with Python Cookbook, Second Edition - Published by Packt
-
 ---
 
 ## Repository Structure
