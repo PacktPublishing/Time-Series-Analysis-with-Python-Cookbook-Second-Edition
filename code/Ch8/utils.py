@@ -1,82 +1,113 @@
 """
-Utility functions for Chapter 8: Outlier Detection (Statistical)
+Utility functions for Chapter 8: Time Series Decomposition
 """
 
 import pandas as pd
+from pathlib import Path
+from statsmodels.datasets import co2, get_rdataset
 import matplotlib.pyplot as plt
 
-def plot_outliers(outliers, data, method='KNN', halignment='right', valignment='bottom', labels=False):
+
+def load_ch8_datasets(base_path='../../datasets/Ch8'):
     """
-    Plot time series data with highlighted outliers.
-    
+    Load and return the three time series datasets used in Chapter 8.
+
     Parameters
     ----------
-    outliers : pandas.DataFrame or pandas.Series
-        The DataFrame or Series containing the outlier data points.
-    data : pandas.DataFrame or pandas.Series
-        The complete time series data.
-    method : str, default='KNN'
-        The outlier detection method used, displayed in the plot title.
-    halignment : str, default='right'
-        Horizontal alignment for the date labels ('left', 'center', or 'right').
-    valignment : str, default='bottom'
-        Vertical alignment for the date labels ('top', 'center', or 'bottom').
-    labels : bool, default=False
-        If True, displays date labels for each outlier point.
-        
+    base_path : str, default '../../datasets/Ch8'
+        Base folder path where the CSV files are stored.
+
+    Returns
+    -------
+    airp_df : pandas.DataFrame
+        Monthly airline passengers.
+    closing_price : pandas.DataFrame
+        Daily closing prices.
+    co2_df : pandas.DataFrame
+        Weekly atmospheric CO2 concentrations.
+    """
+    base = Path(base_path)
+
+    # Load closing prices
+    closing_price = pd.read_csv(
+        base / 'closing_price.csv',
+        index_col='Date',
+        parse_dates=True
+    )
+
+    # Load and clean CO2 dataset
+    co2_df = co2.load_pandas().data
+    co2_df = co2_df.ffill()
+
+    # Load and prepare AirPassengers dataset
+    air_passengers = get_rdataset("AirPassengers")
+    airp_df = air_passengers.data
+    airp_df.index = pd.date_range('1949', '1961', freq='ME')
+    airp_df.drop(columns=['time'], inplace=True)
+    airp_df.rename(columns={'value': 'passengers'}, inplace=True)
+
+    return airp_df, closing_price, co2_df
+
+
+def plot_comparison(methods, kpss_results, adf_results, plot_type='line'):
+    """
+    Plot transformed series and summarize stationarity tests.
+
+    Parameters
+    ----------
+    methods : list of pandas.Series
+        List of transformed time series to compare.
+    kpss_results : callable
+        Function that takes a Series and returns a dict-like object
+        with a 'Decision' field for the KPSS test.
+    adf_results : callable
+        Function that takes a Series and returns a dict-like object
+        with a 'Decision' field for the ADF test.
+    plot_type : {'line', 'hist'}, default 'line'
+        Type of plot to use for each transformed series.
+
     Returns
     -------
     None
-        The function shows the plot but does not return any value.
+        Displays a grid of subplots comparing the transformations.
     """
-    
-    fig, ax = plt.subplots(figsize=(10, 6))
-        
-    data.plot(ax=ax, alpha=0.6)
-    
-    # Plot outliers
-    if labels:
-        outliers.plot(ax=ax, style='rx', markersize=8, legend=False)
-        
-        # Add text labels for each outlier
-        for idx, value in outliers['value'].items():
-            ax.text(idx, value, f'{idx.date()}', 
-                   horizontalalignment=halignment, 
-                   verticalalignment=valignment)
-    else:
-        outliers.plot(ax=ax, style='rx', legend=False)
-    
-    ax.set_title(f'NYC Taxi - {method}')
-    ax.set_xlabel('date')
-    ax.set_ylabel('# of passengers')
-    ax.legend(['nyc taxi', 'outliers'])
-    
+    n = len(methods) // 2 + len(methods) % 2  # rows needed for subplots
+    fig, ax = plt.subplots(n, 2, sharex=True, figsize=(20, 10))
+    ax = ax.flatten()
+
+    for i, method in enumerate(methods):
+        series = method.dropna()  # ensure no NaNs
+
+        # Derive a label for the series
+        name = getattr(series, "name", f"method_{i+1}")
+
+        # Perform KPSS and ADF tests
+        kpss_result = kpss_results(series)
+        adf_result = adf_results(series)
+
+        kpss_decision = kpss_result['Decision']
+        adf_decision = adf_result['Decision']
+
+        # Plot series
+        series.plot(
+            kind=plot_type,
+            ax=ax[i],
+            legend=False,
+            title=(
+                f"Method={name}, "
+                f"KPSS={kpss_decision}, "
+                f"ADF={adf_decision}"
+            ),
+        )
+        ax[i].title.set_size(14)
+
+        # Add rolling mean (52-week window)
+        if plot_type == 'line':
+            series.rolling(52).mean().plot(ax=ax[i], legend=False)
+
+    # Remove any unused axes
+    for j in range(i + 1, len(ax)):
+        fig.delaxes(ax[j])
+
     plt.tight_layout()
     plt.show()
-
-def plot_zscore(data_series, d=3):
-    """
-    Plot the standardized z-scores with threshold lines using Series index for x-axis.
-    
-    Parameters:
-    - data_series: Series containing z-scores with datetime index
-    - d: Threshold in standard deviations (default: 3)
-    """
-    
-    plt.plot(data_series.index, data_series.values, 'k^', markersize=4)
-    
-    plt.axhline(y=d, color='r', linestyle='--', label=f'+{d} SD')
-    plt.axhline(y=-d, color='r', linestyle='--', label=f'-{d} SD')
-    
-    # Highlight outliers
-    outliers = data_series[abs(data_series) > d]
-    if not outliers.empty:
-        plt.plot(outliers.index, outliers.values, 'ro', markersize=8, label='Outliers')
-    
-    plt.ylabel('Z-score')
-    plt.title('Standardized Taxi Passenger Data with Outlier Thresholds')
-    plt.legend()
-    
-    # Format x-axis for dates
-    plt.gcf().autofmt_xdate()
-    plt.tight_layout()

@@ -2,68 +2,72 @@
 #    uv pip compile requirements.in --python-version 3.13 -o requirements.txt
 appnope==0.1.4
     # via ipykernel
+asn1crypto==1.5.1
+    # via snowflake-connector-python
 asttokens==3.0.0
     # via stack-data
 beautifulsoup4==4.14.2
-    # via -r requirements.in
-bokeh==3.8.0
-    # via -r requirements.in
+    # via yfinance
 boto3==1.40.46
-    # via -r requirements.in
+    # via snowflake-connector-python
 botocore==1.40.46
     # via
     #   boto3
-    #   s3fs
     #   s3transfer
+    #   snowflake-connector-python
 certifi==2025.10.5
-    # via requests
+    # via
+    #   curl-cffi
+    #   influxdb3-python
+    #   requests
+    #   snowflake-connector-python
+cffi==1.17.1
+    # via
+    #   cryptography
+    #   curl-cffi
+    #   snowflake-connector-python
 charset-normalizer==3.4.3
-    # via requests
-click==8.3.0
     # via
-    #   dask
-    #   distributed
+    #   requests
+    #   snowflake-connector-python
 cloudpickle==3.1.1
-    # via
-    #   dask
-    #   distributed
+    # via snowflake-snowpark-python
 comm==0.2.3
     # via ipykernel
-contourpy==1.3.3
-    # via bokeh
-dask==2025.9.1
-    # via distributed
+cryptography==46.0.0
+    # via
+    #   pyopenssl
+    #   snowflake-connector-python
+curl-cffi==0.13.0
+    # via yfinance
 debugpy==1.8.17
     # via ipykernel
 decorator==5.2.1
     # via ipython
-distributed==2025.9.1
-    # via -r requirements.in
-et-xmlfile==2.0.0
-    # via openpyxl
+dnspython==2.8.0
+    # via pymongo
 executing==2.2.1
     # via stack-data
-fsspec==2025.9.0
-    # via
-    #   dask
-    #   modin
-    #   s3fs
-html5lib==1.1
-    # via -r requirements.in
+filelock==3.19.1
+    # via snowflake-connector-python
+frozendict==2.4.6
+    # via yfinance
 idna==3.10
-    # via requests
+    # via
+    #   requests
+    #   snowflake-connector-python
+influxdb3-python==0.16.0
+    # via -r requirements.in
 ipykernel==6.30.1
     # via -r requirements.in
 ipython==9.6.0
     # via ipykernel
 ipython-pygments-lexers==1.1.1
     # via ipython
+iso8601==1.0.2
+    # via taospy
 jedi==0.19.2
     # via ipython
-jinja2==3.1.6
-    # via
-    #   bokeh
-    #   distributed
 jmespath==1.0.1
     # via
     #   boto3
@@ -74,131 +78,131 @@ jupyter-core==5.8.1
     # via
     #   ipykernel
     #   jupyter-client
-locket==1.0.0
-    # via
-    #   distributed
-    #   partd
-lxml==6.0.2
-    # via -r requirements.in
-lz4==4.4.4
-    # via -r requirements.in
-markupsafe==3.0.3
-    # via jinja2
 matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
-memory-profiler==0.61.0
-    # via -r requirements.in
-modin==0.37.1
-    # via -r requirements.in
-msgpack==1.1.1
-    # via distributed
-narwhals==2.7.0
-    # via bokeh
+multitasking==0.0.12
+    # via yfinance
 nest-asyncio==1.6.0
     # via ipykernel
 numpy==2.3.3
     # via
-    #   bokeh
-    #   contourpy
-    #   modin
     #   pandas
-openpyxl==3.1.5
-    # via -r requirements.in
+    #   yfinance
 packaging==25.0
     # via
-    #   bokeh
-    #   dask
-    #   distributed
     #   ipykernel
-    #   modin
     #   pipdeptree
+    #   snowflake-connector-python
+    #   sqlalchemy-redshift
 pandas==2.3.3
-    # via
-    #   bokeh
-    #   modin
+    # via yfinance
 parso==0.8.5
     # via jedi
-partd==1.4.2
-    # via dask
+peewee==3.18.2
+    # via yfinance
 pexpect==4.9.0
     # via ipython
-pillow==11.3.0
-    # via bokeh
 pip==25.2
     # via pipdeptree
 pipdeptree==2.28.0
     # via -r requirements.in
 platformdirs==4.4.0
-    # via jupyter-core
-polars==1.34.0
-    # via -r requirements.in
-polars-runtime-32==1.34.0
-    # via polars
+    # via
+    #   jupyter-core
+    #   snowflake-connector-python
+    #   yfinance
 prompt-toolkit==3.0.52
     # via ipython
-psutil==7.1.0
+protobuf==6.31.1
     # via
-    #   distributed
-    #   ipykernel
-    #   memory-profiler
-    #   modin
+    #   snowflake-snowpark-python
+    #   yfinance
+psutil==7.1.0
+    # via ipykernel
+psycopg==3.2.10
+    # via -r requirements.in
+psycopg2-binary==2.9.10
+    # via -r requirements.in
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
 pyarrow==21.0.0
-    # via -r requirements.in
+    # via influxdb3-python
+pycparser==2.23
+    # via cffi
 pygments==2.19.2
     # via
     #   ipython
     #   ipython-pygments-lexers
+pyjwt==2.10.1
+    # via snowflake-connector-python
+pymongo==4.15.2
+    # via -r requirements.in
+pyopenssl==25.3.0
+    # via snowflake-connector-python
 python-dateutil==2.9.0.post0
     # via
     #   botocore
+    #   influxdb3-python
     #   jupyter-client
     #   pandas
+    #   snowflake-snowpark-python
 pytz==2025.2
-    # via pandas
-pyyaml==6.0.3
     # via
-    #   bokeh
-    #   dask
-    #   distributed
+    #   pandas
+    #   snowflake-connector-python
+    #   taospy
+    #   yfinance
+pyyaml==6.0.3
+    # via snowflake-snowpark-python
 pyzmq==27.1.0
     # via
     #   ipykernel
     #   jupyter-client
+reactivex==4.0.4
+    # via influxdb3-python
 requests==2.32.5
-    # via -r requirements.in
-s3fs==0.4.2
-    # via -r requirements.in
+    # via
+    #   snowflake-connector-python
+    #   taospy
+    #   yfinance
 s3transfer==0.14.0
     # via boto3
 setuptools==80.9.0
-    # via -r requirements.in
+    # via snowflake-snowpark-python
 six==1.17.0
+    # via python-dateutil
+snowflake-connector-python==3.18.0
     # via
-    #   html5lib
-    #   python-dateutil
+    #   snowflake-snowpark-python
+    #   snowflake-sqlalchemy
+snowflake-snowpark-python==1.40.0
+    # via -r requirements.in
+snowflake-sqlalchemy==1.7.7
+    # via -r requirements.in
 sortedcontainers==2.4.0
-    # via distributed
+    # via snowflake-connector-python
 soupsieve==2.8
     # via beautifulsoup4
+sqlalchemy==1.4.54
+    # via
+    #   snowflake-sqlalchemy
+    #   sqlalchemy-redshift
+sqlalchemy-redshift==0.8.14
+    # via -r requirements.in
 stack-data==0.6.3
     # via ipython
-tblib==3.1.0
-    # via distributed
-toolz==1.0.0
-    # via
-    #   dask
-    #   distributed
-    #   partd
+taos-ws-py==0.6.2
+    # via -r requirements.in
+taospy==2.8.5
+    # via -r requirements.in
+tomlkit==0.13.3
+    # via snowflake-connector-python
 tornado==6.5.2
     # via
-    #   bokeh
-    #   distributed
     #   ipykernel
     #   jupyter-client
 traitlets==5.14.3
@@ -211,19 +215,23 @@ traitlets==5.14.3
 typing-extensions==4.15.0
     # via
     #   beautifulsoup4
-    #   modin
+    #   reactivex
+    #   snowflake-connector-python
+    #   snowflake-snowpark-python
 tzdata==2025.2
     # via pandas
+tzlocal==5.3.1
+    # via snowflake-snowpark-python
 urllib3==2.5.0
     # via
     #   botocore
-    #   distributed
+    #   influxdb3-python
     #   requests
 wcwidth==0.2.14
     # via prompt-toolkit
-webencodings==0.5.1
-    # via html5lib
-xyzservices==2025.4.0
-    # via bokeh
-zict==3.0.0
-    # via distributed
+websockets==15.0.1
+    # via yfinance
+wheel==0.45.1
+    # via snowflake-snowpark-python
+yfinance==0.2.66
+    # via -r requirements.in

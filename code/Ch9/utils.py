@@ -1,113 +1,112 @@
 """
-Utility functions for Chapter 9: Time Series Decomposition
+Utility functions for Chapter 9: Building Univariate Time Series Models Using Statistical Methods
 """
 
 import pandas as pd
-from pathlib import Path
-from statsmodels.datasets import co2, get_rdataset
 import matplotlib.pyplot as plt
+from statsmodels.tsa.api import adfuller
+from itertools import product
 
-
-def load_ch9_datasets(base_path='../../datasets/Ch9'):
+def split_data(data, test_split):
     """
-    Load and return the three time series datasets used in Chapter 9.
-
-    Parameters
-    ----------
-    base_path : str, default '../../datasets/Ch9'
-        Base folder path where the CSV files are stored.
-
-    Returns
-    -------
-    airp_df : pandas.DataFrame
-        Monthly airline passengers.
-    closing_price : pandas.DataFrame
-        Daily closing prices.
-    co2_df : pandas.DataFrame
-        Weekly atmospheric CO2 concentrations.
+    Split time series data into train and test sets while preserving temporal order.
+    
+    Parameters:
+    data : pandas.DataFrame or Series
+        Time series data to split
+    test_split : float
+        Proportion of data to use for testing (0 to 1)
+        
+    Returns:
+    train, test : tuple of pandas.DataFrame or Series
+        Training and test sets maintaining temporal order
     """
-    base = Path(base_path)
+    l = len(data)
+    t_idx = round(l*(1-test_split))
+    train, test = data[ : t_idx], data[t_idx : ]
+    print(f'train: {len(train)} , test: {len(test)}')
+    return train, test
 
-    # Load closing prices
-    closing_price = pd.read_csv(
-        base / 'closing_price.csv',
-        index_col='Date',
-        parse_dates=True
-    )
-
-    # Load and clean CO2 dataset
-    co2_df = co2.load_pandas().data
-    co2_df = co2_df.ffill()
-
-    # Load and prepare AirPassengers dataset
-    air_passengers = get_rdataset("AirPassengers")
-    airp_df = air_passengers.data
-    airp_df.index = pd.date_range('1949', '1961', freq='ME')
-    airp_df.drop(columns=['time'], inplace=True)
-    airp_df.rename(columns={'value': 'passengers'}, inplace=True)
-
-    return airp_df, closing_price, co2_df
-
-
-def plot_comparison(methods, kpss_results, adf_results, plot_type='line'):
+def check_stationarity(df):
     """
-    Plot transformed series and summarize stationarity tests.
-
-    Parameters
-    ----------
-    methods : list of pandas.Series
-        List of transformed time series to compare.
-    kpss_results : callable
-        Function that takes a Series and returns a dict-like object
-        with a 'Decision' field for the KPSS test.
-    adf_results : callable
-        Function that takes a Series and returns a dict-like object
-        with a 'Decision' field for the ADF test.
-    plot_type : {'line', 'hist'}, default 'line'
-        Type of plot to use for each transformed series.
-
-    Returns
-    -------
-    None
-        Displays a grid of subplots comparing the transformations.
+    Test if a time series is stationary using the Augmented Dickey-Fuller test.
+    
+    Parameters:
+    df : pandas Series/DataFrame
+        Time series data
+        
+    Returns:
+    tuple : (status, p_value)
+        status: 'Stationary' or 'Non-Stationary'
+        p_value: ADF test p-value
     """
-    n = len(methods) // 2 + len(methods) % 2  # rows needed for subplots
-    fig, ax = plt.subplots(n, 2, sharex=True, figsize=(20, 10))
-    ax = ax.flatten()
+    results = adfuller(df)[1:3]
+    s = 'Non-Stationary'
+    if results[0] < 0.05:
+        s = 'Stationary'
+    print(f"'{s}\t p-value:{results[0]} \t lags:{results[1]}")
+    return (s, results[0])
 
-    for i, method in enumerate(methods):
-        series = method.dropna()  # ensure no NaNs
+def get_top_models_df(scores, criterion='AIC', top_n=5):
+    """
+    Rank time series models based on their performance metrics.
+    
+    Parameters:
+    scores : dict
+        Dictionary of model results and their metrics
+    criterion : str, default='AIC'
+        Metric for ranking (AIC, RMSE, MAPE, etc.)
+    top_n : int, default=5
+        Number of top models to return
+        
+    Returns:
+    DataFrame with top performing models sorted by criterion
+    """
+    sorted_scores = sorted(scores.items(), 
+                           key=lambda item: item[1][criterion])
+    
+    top_models = sorted_scores[:top_n]
 
-        # Derive a label for the series
-        name = getattr(series, "name", f"method_{i+1}")
+    data = [v for k, v in top_models]
+    df = pd.DataFrame(data)
+    
+    df['model_id'] = [k for k, v in top_models]
+    df.set_index('model_id', inplace=True)
 
-        # Perform KPSS and ADF tests
-        kpss_result = kpss_results(series)
-        adf_result = adf_results(series)
+    return df
 
-        kpss_decision = kpss_result['Decision']
-        adf_decision = adf_result['Decision']
-
-        # Plot series
-        series.plot(
-            kind=plot_type,
-            ax=ax[i],
-            legend=False,
-            title=(
-                f"Method={name}, "
-                f"KPSS={kpss_decision}, "
-                f"ADF={adf_decision}"
-            ),
-        )
-        ax[i].title.set_size(14)
-
-        # Add rolling mean (52-week window)
-        if plot_type == 'line':
-            series.rolling(52).mean().plot(ax=ax[i], legend=False)
-
-    # Remove any unused axes
-    for j in range(i + 1, len(ax)):
-        fig.delaxes(ax[j])
-
-    plt.tight_layout()
+def plot_forecast(model, start, train, test):
+    """
+    Visualize model forecasts against actual values.
+    
+    Parameters:
+    model : fitted time series model
+    start : str or datetime
+        Start date for the forecast
+    train : pandas.Series
+        Training data
+    test : pandas.Series
+        Test data
+    """
+    forecast = pd.DataFrame(model.forecast(test.shape[0]), 
+                          index=test.index)
+    
+    ax = train.loc[start:].plot(style='--')
+    test.plot(ax=ax)
+    forecast.plot(ax=ax, style = '-.')
+    ax.legend(['orig_train', 'orig_test', 'forecast'])
     plt.show()
+
+def combinator(items, r=1):
+    """
+    Generate parameter combinations for grid search.
+    
+    Parameters:
+    items : list of lists
+        Lists of parameter values to combine
+        
+    Returns:
+    list of tuples containing all possible parameter combinations
+    """
+    combo = [i for i in product(*items, repeat=r)]
+    return combo

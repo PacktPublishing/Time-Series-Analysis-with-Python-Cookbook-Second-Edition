@@ -1,103 +1,82 @@
 """
-Utility functions for Chapter 7: Handling Missing Data
+Utility functions for Chapter 7: Outlier Detection (Statistical)
 """
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 
-def read_dataset(folder, file, date_col=None, format=None, index=False):
-    '''
-    Reads a CSV dataset from a specified folder and converts date columns to datetime.
+def plot_outliers(outliers, data, method='KNN', halignment='right', valignment='bottom', labels=False):
+    """
+    Plot time series data with highlighted outliers.
     
-    Parameters:
-    folder: the directory containing the file passed a Path object
-    file: the CSV filename in that Path object. 
-    date_col: specify a column which has datetime
-    format: the date format string for parsing dates
-    index: True if date_col should be the index
+    Parameters
+    ----------
+    outliers : pandas.DataFrame or pandas.Series
+        The DataFrame or Series containing the outlier data points.
+    data : pandas.DataFrame or pandas.Series
+        The complete time series data.
+    method : str, default='KNN'
+        The outlier detection method used, displayed in the plot title.
+    halignment : str, default='right'
+        Horizontal alignment for the date labels ('left', 'center', or 'right').
+    valignment : str, default='bottom'
+        Vertical alignment for the date labels ('top', 'center', or 'bottom').
+    labels : bool, default=False
+        If True, displays date labels for each outlier point.
+        
+    Returns
+    -------
+    None
+        The function shows the plot but does not return any value.
+    """
     
-    Returns: 
-    pandas DataFrame with a DatetimeIndex
-    '''
-    index_col = date_col if index is True else None
+    fig, ax = plt.subplots(figsize=(10, 6))
+        
+    data.plot(ax=ax, alpha=0.6)
     
-    df = pd.read_csv(folder / file, 
-                     index_col=index_col, 
-                     parse_dates=[date_col],
-                     date_format=format)
-    return df
-
-def plot_dfs(df1, df2, col, title=None, xlabel=None, ylabel=None):
-    '''
-    Creates comparative plots of original data versus data with missing values.
+    # Plot outliers
+    if labels:
+        outliers.plot(ax=ax, style='rx', markersize=8, legend=False)
+        
+        # Add text labels for each outlier
+        for idx, value in outliers['value'].items():
+            ax.text(idx, value, f'{idx.date()}', 
+                   horizontalalignment=halignment, 
+                   verticalalignment=valignment)
+    else:
+        outliers.plot(ax=ax, style='rx', legend=False)
     
-    Parameters:
-    df1: original dataframe without missing data
-    df2: dataframe with missing data 
-    col: column name that contains missing data in df2 
-    title: title for the entire figure
-    xlabel: x-axis label for all subplots
-    ylabel: y-axis label for the original data subplot
+    ax.set_title(f'NYC Taxi - {method}')
+    ax.set_xlabel('date')
+    ax.set_ylabel('# of passengers')
+    ax.legend(['nyc taxi', 'outliers'])
     
-    Returns: 
-    None - displays the plot using plt.show()
-    '''    
-    df_missing = df2.rename(columns={col: 'missing'})
-    
-    columns = df_missing.loc[:, 'missing':].columns.tolist()
-    subplots_size = len(columns)
-    
-    fig, ax = plt.subplots(subplots_size+1, 1, sharex=True)
-    plt.subplots_adjust(hspace=0.25)
-    
-    if title:
-        fig.suptitle(title)
-    
-    df1[col].plot(ax=ax[0], figsize=(12, 10))
-    ax[0].set_title('Original Dataset')
-    ax[0].set_xlabel(xlabel)
-    ax[0].set_ylabel(ylabel)    
-    
-    for i, colname in enumerate(columns):
-        df_missing[colname].plot(ax=ax[i+1])
-        ax[i+1].set_title(colname)
-    
-    fig.tight_layout()
+    plt.tight_layout()
     plt.show()
 
-def rmse_score(df1, df2, col=None):
-    '''
-    Calculates RMSE scores between original data and multiple versions of processed data.
+def plot_zscore(data_series, d=3):
+    """
+    Plot the standardized z-scores with threshold lines using Series index for x-axis.
     
     Parameters:
-    df1: original dataframe without missing data
-    df2: dataframe with processed data (imputed, filled, etc.)
-    col: column name in df1 to compare against processed versions in df2
-         If None, the function will fail as it needs to know which column to compare
+    - data_series: Series containing z-scores with datetime index
+    - d: Threshold in standard deviations (default: 3)
+    """
     
-    Returns:
-    list: RMSE scores for each processed column compared to the original
+    plt.plot(data_series.index, data_series.values, 'k^', markersize=4)
     
-    Note: The function renames the column specified by 'col' to 'missing' in df2,
-    then compares all columns after 'missing' with the original column from df1.
-    '''
-    if col is None:
-        raise ValueError("Column name must be specified")
-        
-    df_missing = df2.rename(columns={col: 'missing'})
+    plt.axhline(y=d, color='r', linestyle='--', label=f'+{d} SD')
+    plt.axhline(y=-d, color='r', linestyle='--', label=f'-{d} SD')
     
-    # Get all columns starting from 'missing'
-    columns = df_missing.loc[:, 'missing':].columns.tolist()
+    # Highlight outliers
+    outliers = data_series[abs(data_series) > d]
+    if not outliers.empty:
+        plt.plot(outliers.index, outliers.values, 'ro', markersize=8, label='Outliers')
     
-    if len(columns) <= 1:
-        raise ValueError("No comparison columns found after the specified column")
+    plt.ylabel('Z-score')
+    plt.title('Standardized Taxi Passenger Data with Outlier Thresholds')
+    plt.legend()
     
-    scores = []
-    for comp_col in columns[1:]:
-        rmse = np.sqrt(np.mean((df1[col] - df_missing[comp_col])**2))
-        scores.append(rmse)
-        print(f'RMSE for {comp_col}: {rmse}')
-    
-    return scores
+    # Format x-axis for dates
+    plt.gcf().autofmt_xdate()
+    plt.tight_layout()

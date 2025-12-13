@@ -1,417 +1,240 @@
+"""
+Utility functions for Chapter 12: Deep Learning for Time Series Forecasting
+"""
+
+from importlib.resources import path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_squared_error as mse
-from sklearn.metrics import mean_absolute_error as mae
-from sklearn.metrics import mean_absolute_percentage_error as mape
-from sktime.performance_metrics.forecasting import mean_absolute_scaled_error as mase
-from sktime.forecasting.compose import make_reduction
-from sktime.forecasting.base import ForecastingHorizon
-from sktime.forecasting.model_selection import ForecastingGridSearchCV, ExpandingWindowSplitter
-from sklearn.pipeline import make_pipeline as sklearn_make_pipeline
-from sklearn.multioutput import MultiOutputRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from tensorflow.keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint, ReduceLROnPlateau
+import datetime
+from pathlib import Path
 
-def handle_missing_data(df):
-    n = int(df.isna().sum().sum()) # total missing values
-    if n > 0:
-        print(f'found {n} missing observations...')
-        df.ffill(inplace=True)
+def load_dataset():
+    path = Path('../../datasets/Ch12/')
+    energy = pd.read_csv(path.joinpath('energy_consumption.csv'), 
+                     index_col='Month', 
+                     parse_dates=True)
 
-def generate_lagged_features(df, window):
-    """Transform time series data into a supervised learning format using sliding windows.
-    
+    energy.columns = ['y'] # rename column for clarity
+    energy.index.freq = 'MS' #set frequency
+    energy.plot(title='Monthly Energy Consumption')
+    plt.xlabel('Month')
+    plt.ylabel('Energy Consumption')
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.show()
+    return energy
+
+
+def fill_missing_forward(df):
+    """
+    Checks for missing data and fills using forward fill.
+
     Args:
-        df (pd.DataFrame): Univariate time series data
-        window (int): Number of time steps to use as features
+        df (pd.DataFrame): DataFrame with a time series in a column named 'y'
+
+    Returns:
+        pd.DataFrame: DataFrame with missing values filled.
+    """
+    n_missing = int(df['y'].isna().sum()) # Assuming single column 'y'
+    if n_missing > 0:
+        print(f'Found {n_missing} missing observations... filling forward.')
+        df = df.ffill()
+    return df
+
+def create_sequences(df, window_size, target_col='y'):
+    """
+    Convert a time series into a supervised learning dataset with lagged features.
+    
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        Time series data with single target column
+    window_size : int
+        Number of lagged observations to use as input features
+    target_col : str, optional
+        Name of the column in 'df' that contains the target time series values.
+        Default is 'y'
         
     Returns:
-        pd.DataFrame: DataFrame with lagged features (x_1 to x_n) and target (y)
+    --------
+    pandas.DataFrame
+        DataFrame with lagged features (x1, x2, ...) and target (y)
     """
-    # Validate input
-    if not isinstance(window, int) or window < 1:
-        raise ValueError("Window size must be a positive integer")
+    try:
+        # Extract the target column as a 1D NumPy array
+        data_values = df[target_col].values 
+    except KeyError:
+        raise KeyError(f"""Column '{target_col}' not found in DataFrame. 
+                        Please ensure the target column is correctly named.""")
+
+    X_list = [data_values[i:i+window_size] for i in range(len(data_values)-window_size)]
+    X = np.array(X_list) # Creates a 2D array (num_sequences, window_size)
     
-    # Convert DataFrame to 1D array
-    d = df.values.squeeze()
-    
-    # Create sliding windows of past observations
-    x = np.lib.stride_tricks.sliding_window_view(d, window_shape=window)[:-1]
-    
-    # Create target variable (next time step)
-    y = d[window:]
-    
-    # Create column names for lagged features
-    cols = [f'x_{i}' for i in range(1, window+1)]
+    # Target is the value immediately following each window
+    y_values = data_values[window_size:]
+    idx = df.index[window_size:]
 
-    # Create DataFrames for features and target
-    df_xs = pd.DataFrame(x, columns=cols, index=df.index[window:])
-    df_y = pd.DataFrame(y, columns=['y'], index=df.index[window:])
+    feature_cols = [f'x{i+1}' for i in range(window_size)]
 
-    # Combine features and target into a single DataFrame
-    return pd.concat([df_xs, df_y], axis=1)
+    seq_df = pd.DataFrame(X, columns=feature_cols, index=idx)
+    # Assign the target values to a column named 'y' in the new DataFrame
+    seq_df['y'] = y_values
 
+    return seq_df
 
-
-def multiple_output_features(df, window_in, window_out):
-    d = df.values.squeeze()
-
-    x = np.lib.stride_tricks.sliding_window_view(d, window_shape=window_in)[:-window_out]
-    y = np.lib.stride_tricks.sliding_window_view(d[window_in:], window_shape=window_out)
-
-    cols_x = [f'x_{i}' for i in range(1, window_in + 1)]
-    cols_y = [f'y_{i}' for i in range(1, window_out + 1)]
-    
-    df_xs = pd.DataFrame(x, columns=cols_x, index=df.index[window_in:len(df) - window_out + 1])
-    df_ys = pd.DataFrame(y, columns=cols_y, index=df.index[window_in:len(df) - window_out + 1])
-
-    return pd.concat([df_xs, df_ys], axis=1)
-
-def split_data(df, test_split=0.10):
-    """Split time series data into training and test sets.
-    
-    Args:
-        df (pd.DataFrame): Time series data to split
-        test_split (float, default=0.10): Proportion of data to use for testing
-        
-    Returns:
-        tuple: (train_df, test_df)
+class TimeSeriesStandardScaler:
     """
-    n = int(len(df) * test_split)
-    train, test = df[:-n], df[-n:]
-    return train, test
+    Standardizes time series data and provides train/val/test splits.
+    """
+    def __init__(self, df, test_size, val_size):
+        """
+        Initializes the preprocessor.
 
-class Standardize:
-    def __init__(self):
+        Args:
+            df (pd.DataFrame): The DataFrame containing sequences (features and target).
+            test_size (int): Number of periods for the test set.
+            val_size (int): Number of periods for the validation set.
+        """
+        self.data = df
+        self.test_periods = test_size
+        self.val_periods = val_size
         self.mu = None
         self.sigma = None
-
-    def _transform(self, df):
-        return (df - self.mu) / self.sigma
-
-    def fit_transform(self, train, test):
-        # Calculate mean and std on training data only
-        self.mu = train.mean()
-        self.sigma = train.std()
+    
+    def split_data(self):
+        """
+        Splits the data into training, validation, and test sets based on time order.
+        """
+        n_total = len(self.data)
         
-        # Standardize training and test sets
-        train_s = self._transform(train)
-        test_s = self._transform(test)
-        return train_s, test_s
+        test_start = n_total - self.test_periods
+        val_start = test_start - self.val_periods
+        # Create splits maintaining temporal order
+        train = self.data.iloc[:val_start]
+        val = self.data.iloc[val_start:test_start]
+        test = self.data.iloc[test_start:]
+             
+        assert len(test) + len(train) + len(val) == len(self.data)
+        return train, val, test
+    
+    def _transform(self, data):
+        if self.mu is None or self.sigma is None:
+            raise ValueError("Scaler not fitted yet. Call fit_transform() first.")
+        data_s = (data - self.mu)/self.sigma
+        return data_s
+    
+    def fit_transform(self):
+        """
+        Fits the scaler on the training data and transforms train, val, and test sets.
+        Scales all features and target using the same parameters derived from the training data.
+        """
+        train, val, test = self.split_data()
+        self.mu, self.sigma = train.mean(), train.std()
+        train_scaled = self._transform(train)
+        test_scaled = self._transform(test)
+        val_scaled = self._transform(val)
+        return train_scaled, val_scaled, test_scaled
+    
+    def inverse_transform(self, data):
+        """
+        Reverses the standardization transformation.
+        """
+        return (data * self.sigma)+self.mu
+        
+    def inverse_transform_target(self, data):
+        """
+        Reverses standardization for target variable only.
+        Assumes target is the last column in the original DataFrame.
+        """
+        return (data * self.sigma[-1])+self.mu[-1]
 
-    def transform(self, df):
-        # Apply transformation to any new data
-        return self._transform(df)
 
-    def inverse(self, df):
-        # Inverse transformation for the whole DataFrame
-        return (df * self.sigma) + self.mu
 
-    def inverse_y(self, df):
-        # Inverse transformation specifically for the first column (y)
-        return (df * self.sigma.iloc[-1]) + self.mu.iloc[-1]
 
-def preprocess(df, split, window=5, generate_features=True):
+def plot_forecast(model, x_test, y_test, test_index, history, preprocessor_instance):
     """
-    Preprocess time series data by handling missing values, generating lagged features (optional),
-    splitting into train/test sets, and standardizing.
+    Plots training loss and actual vs forecasted values for Keras model.
 
     Args:
-        df (pd.DataFrame): Input dataframe. Can be raw time series or already lagged features.
-        split (float): Fraction of data to use for testing.
-        window (int, optional): Window size for lagged features. Defaults to 5.
-        generate_features (bool, optional): Whether to generate lagged features. 
-                                            Set to False if df already contains features. Defaults to True.
-
-    Returns:
-        tuple: (train_scaled, test_scaled, scaler_object)
+        model (keras.Model): Trained Keras model.
+        x_test (np.ndarray): Scaled test features.
+        y_test (np.ndarray): Scaled test target.
+        test_index (pd.Index): Datetime index for the test set.
+        history (keras.callbacks.History): Training history object.
+        preprocessor_instance (TimeSeriesStandardScaler): 
+                The fitted preprocessor object used for inverse scaling.
     """
-    # Handle missing data
-    handle_missing_data(df)
+    fig, ax = plt.subplots(2, 1, figsize=(14, 10))
+
+    # Plot 1: Training and Validation Loss
+    # Training loss plot
+    pd.Series(history.history['loss']).plot(
+                       style='k--',
+                       alpha=0.50, 
+                       title='Keras Model Loss per Epoch',
+                       ax = ax[0], 
+                       label='Training loss')
     
-    if generate_features:
-        # Generate lagged features
-        df_os = _generate_lagged_features(df, window)
-    else:
-        df_os = df
+    # Validation loss plot
+    pd.Series(history.history['val_loss']).plot(
+                      style='k',
+                      ax=ax[0],
+                      label='Validation loss')
+    ax[0].legend()
+    ax[0].grid(True, linestyle='--', alpha=0.5)
+
     
-    # Split data
-    train, test = split_data(df_os, split)
+    # Plot 2: Actual vs Predicted Values
+    # Get predictions
+    predicted = model.predict(x_test)
+    # Inverse transform predictions and actual values to original scale
+    predicted_original = preprocessor_instance.inverse_transform_target(predicted)
+    y_test_original = preprocessor_instance.inverse_transform_target(y_test)
+
+    # Plot actual values
+    pd.Series(y_test_original.reshape(-1), 
+              index=test_index).plot(
+                                style='k--', 
+                                alpha=0.5, 
+                                ax=ax[1], 
+                                title='Keras LSTM One-Step Forecast vs Actual (Test Set)',
+                                label='Actual')
+    pd.Series(predicted_original.reshape(-1), 
+              index=test_index).plot(
+                                style='k',
+                                label='Forecast', 
+                                ax=ax[1])
+    fig.tight_layout()
+    ax[1].legend()
+    ax[1].grid(True, linestyle='--', alpha=0.5)
+    ax[1].set_xlabel('Month')
+    ax[1].set_ylabel('Energy Consumption')
+    plt.show()
+
+    mae_keras = mean_absolute_error(y_test_original, predicted_original)
+    rmse_keras = np.sqrt(mean_squared_error(y_test_original, predicted_original))
+    print(f"Keras Test Set MAE:  {mae_keras:.4f}") 
+    print(f"Keras Test Set RMSE: {rmse_keras:.4f}")
+
+
+def split_ts(data, test_size, val_size):
+    """
+    Split time series data maintaining temporal order.
     
-    # Standardize data
-    sc = Standardize()
-    train_s, test_s = sc.fit_transform(train, test)
-    
-    return train_s, test_s, sc
+    Parameters:
+    - test_size: number of periods for final testing
+    - val_size: number of periods for validation
+    """
+    n_total = len(data)
+    test_start = n_total - test_size
+    val_start = test_start - val_size
 
+    train = data[:val_start]
+    val = data[val_start:test_start]
+    test = data[test_start:]
 
-
-def train_different_models_scaled(train, test, regressors, sc, train_func):
-    results = []
-    for reg_name, regressor in regressors.items():
-        reg = regressor()
-        results.append(train_func(train,
-                                   test,
-                                   reg,
-                                   reg_name, sc))
-    return results
-
-def evaluate_results(results, by='MASE'):
-    cols = ['Model Name', 'RMSE','MAPE', 'MASE']
-    df_sorted = results[cols].sort_values(by).reset_index(drop=True)
-    return df_sorted
-
-def plot_results(results, data_name):
-    cols = ['yhat', 'actual', 'Model Name']
-    for row in results[cols].iterrows():
-        yhat, actual, name = row[1]
-        plt.title(f'{data_name} - {name}')
-        plt.plot(actual, 'k--', alpha=0.5)
-        plt.plot(yhat, 'k')
-        plt.legend(['actual', 'forecast'])
-        plt.show()
-
-
-def train_different_models_mo(train, test, regressors, win_in, win_out, train_func):
-    results = []
-    for reg_name, regressor in regressors.items():
-        result = train_func(
-            train=train, 
-            test=test, 
-            regressor=regressor, 
-            reg_name=reg_name, 
-            win_in=win_in, 
-            win_out=win_out
-        )
-        results.append(result)
-    return results
-
-
-
-
-
-
-def train_different_models_grid_cv(train, test, regressors, train_func):
-    results = []
-    for reg_name, (reg, param_grid) in regressors.items():
-        results.append(train_func(train,
-                                   test,
-                                   reg(),
-                                   reg_name,
-                                   param_grid))
-    return results
-
-def get_best_params(df):
-    best_params = df['Model'].best_params_
-    return best_params
-
-def contains_holiday(year, month):
-    # US holidays
-    # New Year's Day: January 1
-    # Independence Day: July 4
-    # Veterans Day: November 11
-    # Christmas Day: December 25
-    if month in [1, 7, 11, 12]:
-        return 1
-    
-    # Thanksgiving: 4th Thursday of November
-    # Labor Day: 1st Monday of September
-    # Memorial Day: Last Monday of May
-    # Martin Luther King Jr. Day: 3rd Monday of January
-    # Presidents' Day: 3rd Monday of February
-    # Columbus Day: 2nd Monday of October
-    if month in [1, 2, 5, 9, 10, 11]:
-        return 1
-    
-    return 0
-
-def create_forecaster(reg, window_length=12, strategy='multioutput'):
-    sklearn_pipeline = sklearn_make_pipeline(StandardScaler(), reg)
-    m_reg = MultiOutputRegressor(sklearn_pipeline)
-    return make_reduction(estimator=m_reg, window_length=window_length, strategy=strategy)
-
-
-def train_model_mo(train, test, regressor, reg_name, win_in, win_out):
-    X_train, y_train = train.iloc[:, :win_in], train.iloc[:, win_in:]
-    X_test, y_test = test.iloc[:, :win_in], test.iloc[:, win_in:]
-
-    scaler_X = StandardScaler()
-    scaler_y = StandardScaler()
-    
-    X_train_s = scaler_X.fit_transform(X_train)  
-    y_train_s = scaler_y.fit_transform(y_train)  
-
-    X_test_s = scaler_X.transform(X_test)
-    y_test_s = scaler_y.transform(y_test)
-    
-    try:
-        reg = regressor().fit(X_train_s, y_train_s) 
-        print(f'Training {reg_name} ...')
-    except:
-        print(f'{reg_name} does not support multiple outputs')
-        try:
-            reg = MultiOutputRegressor(regressor()).fit(X_train_s, y_train_s)
-            print(f'using sklearn MultipleOutput for {reg_name}')
-        except Exception as e:
-            print(f'Failed for {reg_name}: {e}')
-        
-    yhat = reg.predict(X_test_s)
-    yhat = scaler_y.inverse_transform(yhat)
-    actual = y_test.values
-
-    # Compute evaluation metrics for multi-output, with multioutput='uniform_average'
-    rmse_test = np.sqrt(mse(actual, yhat, multioutput='uniform_average'))
-    mae_test = mae(actual, yhat, multioutput='uniform_average')
-    mape_test = np.mean(np.abs((actual - yhat) / actual)) * 100 
-    mase_test = mase(actual, yhat, y_train=y_train) 
-
-    residuals = actual - yhat
-    
-    model_metadata = {
-        'Model Name': reg_name, 
-        'Model': reg, 
-        'RMSE': rmse_test, 
-        'MAPE': mape_test,
-        'MASE': mase_test,
-        'MAE': mae_test,
-        'test': X_test,
-        'yhat': pd.DataFrame(yhat, index=y_test.index, columns=y_test.columns), 
-        'resid': pd.DataFrame(residuals, index=y_test.index, columns=y_test.columns),
-        'actual': y_test
-    }
-    
-    return model_metadata
-
-
-
-from sklearn.multioutput import MultiOutputRegressor
-
-def train_model_mo_sktime(train, test, reg, reg_name, strategy):
-    
-        
-    fh = ForecastingHorizon(test.index, is_relative=False)
-    sklearn_pipeline = sklearn_make_pipeline(StandardScaler(), reg)
-    
-    try:
-        forecaster = make_reduction(estimator=sklearn_pipeline, 
-                                window_length=10, 
-                                strategy=strategy)
-        forecaster.fit(train, fh=fh)
-        print(f'training {reg_name} ...')
-    except:
-        try:
-            mo_reg = MultiOutputRegressor(sklearn_pipeline)
-            forecaster = make_reduction(estimator=mo_reg, 
-                                window_length=10, 
-                                strategy=strategy)
-            forecaster.fit(train, fh=fh)
-            print(f'using MultiOutputRegressor for {reg_name} ...')
-        except Exception as e:
-            print(f'Failed for {reg_name}: {e}')
-        
-    yhat = forecaster.predict(fh)
-    actual = test.copy()
-    
-    rmse_test = np.sqrt(mse(actual, yhat))
-    mae_test = mae(actual, yhat)
-    mape_test = mape(actual, yhat)
-    mase_test = mase(actual, yhat, y_train=(train))
-
-    model_metadata = {
-        'Model Name': reg_name, 
-        'Model': forecaster, 
-        'RMSE': rmse_test, 
-        'MAPE': mape_test,
-        'MASE': mase_test,
-        'MAE': mae_test,
-        'yhat': yhat, 
-        'actual': actual}
-    
-    return model_metadata
-
-
-def train_different_models_sktime(train, test, regressors, strategy):
-    results = []
-    for reg_name, regressor in regressors.items():
-        reg = regressor()
-        results.append(train_model_mo_sktime(train,
-                                   test,
-                                   reg,
-                                   reg_name,
-                                   strategy))
-    return results
-
-
-def train_model_sktime_cv(train, test, reg, reg_name, param_grid):
-
-    # Full forecasting horizon for prediction
-    fh = ForecastingHorizon(test.index, is_relative=False)
-    
-    # Multi-step horizon for CV
-    fh_cv = np.arange(1, min(30, len(test) + 1))
-    
-    sklearn_pipeline = sklearn_make_pipeline(StandardScaler(), reg)
-
-    # Define a 3-fold expanding window CV cross-validation strategy
-    initial_window = max(50, len(train) // 3)
-    remaining_length = len(train) - initial_window
-    step_length = max(1, (remaining_length - len(test)) // 2)  
-    
-    cv = ExpandingWindowSplitter(initial_window=initial_window, 
-                                 step_length=step_length, 
-                                 fh=fh_cv)
-    
-    try:
-        # Wrap the regressor in a MultiOutputRegressor
-        m_reg = MultiOutputRegressor(sklearn_pipeline)
-        forecaster = make_reduction(estimator=m_reg, 
-                                window_length=10, # 10 lags, adjustable
-                                strategy="multioutput")
-
-        # Perform grid search with cross-validation
-        gscv = ForecastingGridSearchCV(
-                        forecaster=forecaster,
-                        param_grid=param_grid,
-                        cv=cv,
-                        verbose=1)
-
-        gscv.fit(train, fh=fh)
-        print(f'Grid Search CV using MultiOutputRegressor for {reg_name} ...')
-    except Exception as e:
-        print(f'Failed for {reg_name}: {e}')
-        return
-    
-    # Generate predictions and evaluate
-    yhat = gscv.predict(fh)
-    actual = test.copy()
-    
-    # Evaluate model performance using various metrics     
-    rmse_test = np.sqrt(mse(actual, yhat))
-    mae_test = mae(actual, yhat)
-    mape_test = mape(actual, yhat)
-    mase_test = mase(actual, yhat, y_train=(train))
-
-    model_metadata = {
-        'Model Name': reg_name, 
-        'Model': gscv, 
-        'RMSE': rmse_test, 
-        'MAPE': mape_test,
-        'MASE': mase_test,
-        'MAE': mae_test,
-        'yhat': yhat, 
-        'actual': actual}
-    
-    return model_metadata
-
-def train_different_models_sktime_cv(train, test, regressors):
-    results = []
-    for reg_name, regressor in regressors.items():
-        reg = regressor[0]()
-        param_grid = regressor[1]
-        results.append(train_model_sktime_cv(train,
-                                   test,
-                                   reg,
-                                   reg_name, 
-                                   param_grid))
-    return results
+    return train, val, test
