@@ -9,3 +9,7 @@ This chapter explores how to write and persist processed time series data into d
 - Writing time series data to a relational database
 - Writing time series data to MongoDB
 - Writing time series data to Snowflake
+
+
+## Bonus
+- Storing Data to Time Series Database (InfluxDB)

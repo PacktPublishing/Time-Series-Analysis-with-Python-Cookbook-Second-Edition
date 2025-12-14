@@ -9,3 +9,7 @@ This chapter focuses on extracting time series data from diverse database system
 - Reading data from a relational database
 - Reading data from Snowflake
 - Reading data from MongoDB
+
+
+## Bonus
+- Reading data from Time Series Databases (InfluxDB, TDEngine, TimescaleDB)

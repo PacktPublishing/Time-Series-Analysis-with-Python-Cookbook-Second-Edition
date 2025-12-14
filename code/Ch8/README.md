@@ -10,3 +10,7 @@ This chapter guides you through the exploratory phase of time series analysis, c
 - Detecting time series stationarity
 - Applying power transformations
 - Testing for autocorrelation
+
+## Bonus
+- Plotting time series data using pandas
+- Plotting time series data with interactive visualiztion using HvPlot

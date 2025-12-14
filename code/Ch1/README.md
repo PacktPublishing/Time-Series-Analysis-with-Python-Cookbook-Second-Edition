@@ -10,3 +10,6 @@ This chapter introduces the fundamentals of accessing time series data, demonstr
 - Reading data from an Excel file
 - Reading data from URLs
 - Reading data from Parquet files
+
+## Bonus
+- Working with Large Data Files (Polars, Dask, Modin)
