@@ -1,4 +1,4 @@
-aiohttp==3.13.0
+aiohttp==3.13.3
 ipykernel==6.30.1
 nbformat==5.10.4
 neuralprophet==0.9.0
