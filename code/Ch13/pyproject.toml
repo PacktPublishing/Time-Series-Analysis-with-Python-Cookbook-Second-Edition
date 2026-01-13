@@ -14,7 +14,7 @@ dependencies = [
     "decorator==5.2.1",
     "deprecated==1.2.18",
     "executing==2.2.1",
-    "filelock==3.20.0",
+    "filelock==3.20.3",
     "fonttools==4.60.1",
     "fsspec==2025.9.0",
     "holidays==0.82",
