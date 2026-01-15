@@ -27,7 +27,7 @@ dependencies = [
     "decorator==5.2.1",
     "executing==2.2.1",
     "fastjsonschema==2.21.2",
-    "filelock==3.20.0",
+    "filelock==3.20.3",
     "flatbuffers==25.9.23",
     "fonttools==4.60.1",
     "frozenlist==1.8.0",
