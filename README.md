@@ -1,6 +1,29 @@
 # Time Series Analysis with Python Cookbook, Second Edition
 
 ---
+## Chapter Overview
+
+| Chapter | Title | Bonus Recipe (GitHub) |
+|---------|-------|-----------------------|
+| **Ch0** | Setting Up Your Python Environment *(**GitHub only**)* | |
+| **Ch1** | Reading Time Series Data from Files | 1 Recipe |
+| **Ch2** | Reading Time Series Data from Databases | 1 Recipe |
+| **Ch3** | Persisting Time Series Data to Files | 1 Recipe |
+| **Ch4** | Persisting Time Series Data to Databases | 1 Recipe |
+| **Ch5** | Working with Date and Time in Python | |
+| **Ch6** | Handling Missing Data | |
+| **Ch7** | Outlier Detection Using Statistical Methods | |
+| **Ch8** | Exploratory Data Analysis and Diagnosis | 2 Recipes |
+| **Ch9** | Building Univariate Time Series Models Using Statistical Methods | |
+| **Ch10** | Additional Statistical Modeling Techniques for Time Series | |
+| **Ch11** | Forecasting Using Supervised Machine Learning | |
+| **Ch12** | Deep Learning for Time Series Forecasting | |
+| **Ch13** | Outlier Detection Using Unsupervised Machine Learning | |
+| **Ch14** | Advanced Techniques for Complex Time Series | |
+| **Bonus Ch15** | Probabilistic Forecasting *(**GitHub only**)* | |
+| **Bonus Ch16** | Analyzing Time Series in the Frequency Domain *(**GitHub only**)* | |
+
+---
 
 ## Repository Structure
 
@@ -109,30 +132,6 @@ jupyter lab
 > conda env create -f environment.yml
 > conda activate <env-name>
 > ```
-
----
-
-## Chapter Overview
-
-| Chapter | Title | Bonus Recipe (GitHub) |
-|---------|-------|-----------------------|
-| **Ch0** | Setting Up Your Python Environment *(GitHub only)* | |
-| **Ch1** | Reading Time Series Data from Files | 1 Recipe |
-| **Ch2** | Reading Time Series Data from Databases | 1 Recipe |
-| **Ch3** | Persisting Time Series Data to Files | 1 Recipe |
-| **Ch4** | Persisting Time Series Data to Databases | 1 Recipe |
-| **Ch5** | Working with Date and Time in Python | |
-| **Ch6** | Handling Missing Data | |
-| **Ch7** | Outlier Detection Using Statistical Methods | |
-| **Ch8** | Exploratory Data Analysis and Diagnosis | 2 Recipes |
-| **Ch9** | Building Univariate Time Series Models Using Statistical Methods | |
-| **Ch10** | Additional Statistical Modeling Techniques for Time Series | |
-| **Ch11** | Forecasting Using Supervised Machine Learning | |
-| **Ch12** | Deep Learning for Time Series Forecasting | |
-| **Ch13** | Outlier Detection Using Unsupervised Machine Learning | |
-| **Ch14** | Advanced Techniques for Complex Time Series | |
-| **Bonus Ch15** | Probabilistic Forecasting *(GitHub only)* | |
-| **Bonus Ch16** | Analyzing Time Series in the Frequency Domain *(GitHub only)* | |
 
 ---
 
