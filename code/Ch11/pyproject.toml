@@ -20,7 +20,7 @@ dependencies = [
     "debugpy==1.8.17",
     "decorator==5.2.1",
     "executing==2.2.1",
-    "filelock==3.19.1",
+    "filelock==3.20.3",
     "fonttools==4.60.1",
     "frozenlist==1.8.0",
     "fsspec==2025.9.0",
