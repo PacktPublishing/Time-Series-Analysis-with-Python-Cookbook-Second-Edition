@@ -86,6 +86,6 @@ dependencies = [
     "urllib3==2.5.0",
     "wcwidth==0.2.14",
     "websockets==15.0.1",
-    "wheel==0.45.1",
+    "wheel==0.46.2",
     "yfinance==0.2.66",
 ]
