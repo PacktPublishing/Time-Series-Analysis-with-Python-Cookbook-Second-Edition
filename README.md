@@ -5,7 +5,7 @@
 
 | Chapter | Title | Bonus Recipe (GitHub) |
 |---------|-------|-----------------------|
-| **Ch0** | Setting Up Your Python Environment *(**GitHub only**)* | |
+| **Ch0** | Setting Up Your Python Environment *(**GitHub only**)* | 3 Recipes |
 | **Ch1** | Reading Time Series Data from Files | 1 Recipe |
 | **Ch2** | Reading Time Series Data from Databases | 1 Recipe |
 | **Ch3** | Persisting Time Series Data to Files | 1 Recipe |
@@ -20,8 +20,8 @@
 | **Ch12** | Deep Learning for Time Series Forecasting | |
 | **Ch13** | Outlier Detection Using Unsupervised Machine Learning | |
 | **Ch14** | Advanced Techniques for Complex Time Series | |
-| **Bonus Ch15** | Probabilistic Forecasting *(**GitHub only**)* | |
-| **Bonus Ch16** | Analyzing Time Series in the Frequency Domain *(**GitHub only**)* | |
+| **Bonus Ch15** | Probabilistic Forecasting *(**GitHub only**)* | 4 Recipes |
+| **Bonus Ch16** | Analyzing Time Series in the Frequency Domain *(**GitHub only**)* | 3 Recipes |
 
 ---
 
