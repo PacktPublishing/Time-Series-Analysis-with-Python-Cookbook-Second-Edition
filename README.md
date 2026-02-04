@@ -3,7 +3,7 @@
 ---
 ## Chapter Overview
 
-| Chapter | Title | Bonus Recipe (GitHub) |
+| Chapter | Title | Bonus Recipe (GitHub Exclusive) |
 |---------|-------|-----------------------|
 | **Ch0** | Setting Up Your Python Environment *(**GitHub only**)* | 3 Recipes |
 | **Ch1** | Reading Time Series Data from Files | 1 Recipe |
