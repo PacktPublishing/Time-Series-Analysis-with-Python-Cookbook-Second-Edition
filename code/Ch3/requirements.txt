@@ -10,8 +10,6 @@ aiohttp==3.13.0
     #   gcsfs
 aiosignal==1.4.0
     # via aiohttp
-appnope==0.1.4
-    # via ipykernel
 asttokens==3.0.0
     # via stack-data
 attrs==25.4.0
@@ -171,7 +169,7 @@ pexpect==4.9.0
     # via ipython
 pillow==11.3.0
     # via matplotlib
-pip==25.2
+pip==26.0
     # via pipdeptree
 pipdeptree==2.28.0
     # via -r requirements.in
