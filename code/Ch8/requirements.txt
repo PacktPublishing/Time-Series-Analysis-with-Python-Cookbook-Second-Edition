@@ -4,8 +4,6 @@ anyio==4.11.0
     # via
     #   httpx
     #   jupyter-server
-appnope==0.1.4
-    # via ipykernel
 argon2-cffi==25.1.0
     # via jupyter-server
 argon2-cffi-bindings==25.1.0
@@ -256,7 +254,7 @@ pillow==11.3.0
     # via
     #   bokeh
     #   matplotlib
-pip==25.2
+pip==26.0
     # via pipdeptree
 pipdeptree==2.28.0
     # via -r requirements.in
