@@ -65,7 +65,7 @@ dependencies = [
     "platformdirs==4.5.0",
     "prompt-toolkit==3.0.52",
     "propcache==0.4.1",
-    "protobuf==6.32.1",
+    "protobuf==6.33.5",
     "psutil==7.1.0",
     "ptyprocess==0.7.0",
     "pure-eval==0.2.3",
