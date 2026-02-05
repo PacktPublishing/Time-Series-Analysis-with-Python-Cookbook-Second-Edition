@@ -10,8 +10,6 @@ aiohttp==3.13.0
     #   gcsfs
 aiosignal==1.4.0
     # via aiohttp
-appnope==0.1.4
-    # via ipykernel
 asttokens==3.0.0
     # via stack-data
 attrs==25.4.0
@@ -198,7 +196,7 @@ pure-eval==0.2.3
     # via stack-data
 pyarrow==21.0.0
     # via -r requirements.in
-pyasn1==0.6.1
+pyasn1==0.6.2
     # via
     #   pyasn1-modules
     #   rsa
