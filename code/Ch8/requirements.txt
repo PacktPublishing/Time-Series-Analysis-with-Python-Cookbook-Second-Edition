@@ -4,8 +4,6 @@ anyio==4.11.0
     # via
     #   httpx
     #   jupyter-server
-appnope==0.1.4
-    # via ipykernel
 argon2-cffi==25.1.0
     # via jupyter-server
 argon2-cffi-bindings==25.1.0
@@ -186,7 +184,7 @@ narwhals==2.7.0
     #   plotly
 nbclient==0.10.2
     # via nbconvert
-nbconvert==7.16.6
+nbconvert==7.17.0
     # via jupyter-server
 nbformat==5.10.4
     # via
