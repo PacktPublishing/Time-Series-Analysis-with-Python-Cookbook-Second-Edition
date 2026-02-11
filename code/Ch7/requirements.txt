@@ -2,8 +2,6 @@
 #    uv pip compile requirements.in --python-version 3.13 -o requirements.txt
 alembic==1.16.5
     # via optuna
-appnope==0.1.4
-    # via ipykernel
 asttokens==3.0.0
     # via stack-data
 autots==0.6.21
@@ -24,6 +22,8 @@ executing==2.2.1
     # via stack-data
 fonttools==4.60.1
     # via matplotlib
+greenlet==3.3.1
+    # via sqlalchemy
 ipykernel==6.30.1
     # via -r requirements.in
 ipython==9.6.0
@@ -100,7 +100,7 @@ patsy==1.0.1
     # via statsmodels
 pexpect==4.9.0
     # via ipython
-pillow==11.3.0
+pillow==12.1.1
     # via matplotlib
 pip==25.2
     # via pipdeptree
