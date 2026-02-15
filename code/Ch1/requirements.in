@@ -1,5 +1,5 @@
 beautifulsoup4==4.14.2
-bokeh==3.8.0
+bokeh==3.8.2
 boto3==1.40.46
 distributed==2025.9.1
 html5lib==1.1
